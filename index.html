@@ -3,249 +3,149 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>صيدلية العافية</title>
+<title>صيدلية العافية - نظام إدارة</title>
 <style>
-*{box-sizing:border-box;font-family:system-ui}
-body{margin:0;background:#f0f7f2}
-header{background:#0a7a42;color:#fff;padding:15px;text-align:center}
-.login{max-width:380px;margin:60px auto;background:#fff;padding:25px;border-radius:15px;text-align:center;box-shadow:0 5px 20px #0002}
-input,button{width:100%;padding:13px;margin:8px 0;border-radius:10px;border:1px solid #ddd;font-size:16px}
-button{background:#0a7a42;color:#fff;border:0;font-weight:bold}
-.card{background:#fff;padding:15px;margin:10px;border-radius:12px;box-shadow:0 2px 8px #0001}
-.search{padding:12px;margin:10px;width:calc(100% - 20px);border-radius:10px;border:1px solid #ddd}
+*{box-sizing:border-box;font-family:'Segoe UI',system-ui}
+body{margin:0;background:#eef3f1;color:#1a2e22}
+header{background:#0a6b3c;color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
+header b{font-size:19px}
+header button{width:auto;padding:8px 14px;background:#fff;color:#0a6b3c;border:0;border-radius:8px;font-weight:bold;cursor:pointer}
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(180deg,#0a6b3c,#0e9a57)}
+.login{background:#fff;width:100%;max-width:380px;padding:28px;border-radius:18px;text-align:center;box-shadow:0 10px 30px #0003}
+.login h1{margin:0 0 5px;color:#0a6b3c}
+.login p{color:#666;margin:0 0 18px}
+input,select{width:100%;padding:13px;margin:7px 0;border:1px solid #ddd;border-radius:10px;font-size:15px}
+button{cursor:pointer}
+.btn{width:100%;padding:13px;background:#0a6b3c;color:#fff;border:0;border-radius:10px;font-size:16px;font-weight:bold}
+.tabs{display:flex;gap:8px;padding:12px;background:#fff;position:sticky;top:57px;z-index:9;overflow-x:auto}
+.tab{padding:10px 16px;border-radius:20px;border:1px solid #ddd;background:#f8f8f8;white-space:nowrap}
+.tab.active{background:#0a6b3c;color:#fff;border-color:#0a6b3c}
+.wrap{padding:12px;max-width:900px;margin:auto}
+.cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
+.stat{background:#fff;padding:14px;border-radius:14px;text-align:center;box-shadow:0 2px 8px #0001}
+.stat b{font-size:22px;color:#0a6b3c;display:block}
+.stat span{color:#666;font-size:13px}
+.card{background:#fff;padding:14px;border-radius:14px;margin-bottom:10px;box-shadow:0 2px 8px #0001}
+.row{display:flex;gap:8px}
+.small{padding:10px 12px;border-radius:9px;border:0;font-weight:bold}
+.green{background:#0a6b3c;color:#fff}
+.orange{background:#ff8c00;color:#fff}
+.red{background:#d92d20;color:#fff}
+.gray{background:#eee}
+.low{border:2px solid #d92d20}
+.badge{display:inline-block;padding:3px 8px;border-radius:10px;font-size:12px;background:#ffe8e8;color:#d92d20}
+.hidden{display:none!important}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden}
+td,th{padding:10px;border-bottom:1px solid #eee;text-align:right;font-size:14px}
+@media(max-width:600px){.cards{grid-template-columns:1fr 1fr}.stat:last-child{grid-column:span 2}}
 </style>
 </head>
 <body>
-<div id="loginPage">
-<div class="login">
-<h2>💊 صيدلية العافية</h2>
-<p>أهلاً بيكي، ادخلي كلمة السر</p>
+<div id="loginPage" class="login-wrap"><div class="login">
+<div style="font-size:48px">💊</div><h1>صيدلية العافية</h1><p>نظام إدارة الصيدلية</p>
 <input type="password" id="pass" placeholder="كلمة السر">
-<button onclick="login()">دخول</button>
+<button class="btn" onclick="doLogin()">دخول للنظام</button>
+<p id="loginError" style="color:#d92d20;display:none">كلمة السر غير صحيحة</p>
+<p style="font-size:12px;color:#999">نظام آمن ومشفر لإدارة الصيدلية</p>
+</div></div>
+<div id="app" class="hidden">
+<header><b>💊 صيدلية العافية</b><span id="roleLabel"></span><button onclick="logout()">خروج</button></header>
+<div class="tabs">
+<button class="tab active" id="tab-btn-sale" onclick="showTab('sale')">🛒 البيع</button>
+<button class="tab" id="tab-btn-stock" onclick="showTab('stock')">📦 المخزون</button>
+<button class="tab" id="tab-btn-add" onclick="showTab('add')">➕ إضافة دواء</button>
+<button class="tab" id="tab-btn-report" onclick="showTab('report')">📊 التقارير</button>
 </div>
+<div class="wrap">
+<div class="cards">
+<div class="stat"><b id="totalMeds">0</b><span>إجمالي الأصناف</span></div>
+<div class="stat"><b id="todaySales">0 ج</b><span>مبيعات اليوم</span></div>
+<div class="stat"><b id="lowCount">0</b><span>أصناف ناقصة</span></div>
 </div>
-<div id="mainPage" style="display:none">
-<header><h2>💊 صيدلية العافية</h2></header>
-<input class="search" id="search" placeholder="دوري على دواء..." oninput="show()">
-<div id="list"></div>
+<div id="page-sale">
+<input id="search" placeholder="🔍 ابحث باسم الدواء أو الباركود..." oninput="renderSale()">
+<div class="card"><b>🧾 فاتورة البيع</b><div id="cart"></div><div style="display:flex;justify-content:space-between;font-weight:bold;margin:10px 0"><span>الإجمالي:</span><span id="cartTotal">0 ج</span></div><div class="row"><button class="small green" style="flex:2" onclick="checkout()">✅ إتمام البيع وطباعة</button><button class="small gray" style="flex:1" onclick="clearCart()">مسح</button></div></div>
+<div id="saleList"></div>
 </div>
+<div id="page-stock" class="hidden">
+<input id="searchStock" placeholder="🔍 ابحث في المخزون..." oninput="renderStock()">
+<div id="stockList"></div>
+</div>
+<div id="page-add" class="hidden">
+<div class="card"><h3 style="margin:0 0 10px">➕ إضافة صنف جديد</h3>
+<input id="newName" placeholder="اسم الدواء *"><input id="newPrice" type="number" placeholder="سعر البيع *"><input id="newCost" type="number" placeholder="سعر الشراء"><input id="newStock" type="number" placeholder="الكمية في المخزون *"><input id="newBarcode" placeholder="الباركود (اختياري)"><button class="btn" onclick="addMed()">حفظ الدواء</button><p id="addMsg" style="color:#0a6b3c"></p></div>
+</div>
+<div id="page-report" class="hidden">
+<div class="card"><h3 style="margin:0 0 10px">📊 تقرير اليوم</h3><p>عدد الفواتير: <b id="invCount">0</b></p><p>إجمالي المبيعات: <b id="repTotal">0 ج</b></p><p>إجمالي الربح التقديري: <b id="repProfit">0 ج</b></p><button class="small gray" onclick="exportReport()">📥 نسخ التقرير</button></div>
+<div id="reportList"></div>
+</div>
+</div></div>
 <script>
-let role="";
-function login(){
-let p=document.getElementById("pass").value;
-if(p==="1234"){role="manager";}
-else if(p==="1111"){role="cashier";}
-else{alert("كلمة السر غلط");return;}
-document.getElementById("loginPage").style.display="none";
-document.getElementById("mainPage").style.display="block";
-show();
-}
-let meds=[
-{name:"بانادول",price:35,stock:20},
-{name:"كونجستال",price:28,stock:15},
-{name:"أوجمنتين 1جم",price:120,stock:10},
+let role="";let meds=JSON.parse(localStorage.getItem("afiya_meds")||"null")||[
 <!-- END PART 1 -->
-  {name:"فلاجيل 500",price:45,stock:18},
-{name:"أنتينال",price:30,stock:22},
-{name:"سيتال",price:22,stock:30},
-{name:"بروفين 400",price:32,stock:25},
-{name:"كتافلام 50",price:48,stock:12},
-{name:"فولتارين جل",price:65,stock:8},
-{name:"زيرتك",price:55,stock:20},
-{name:"كلاريتين",price:60,stock:15},
-{name:"تلفاست 120",price:75,stock:10},
-{name:"أوتريفين نقط",price:25,stock:18},
-{name:"فيتامين سي",price:40,stock:25},
-{name:"فيتامين د",price:90,stock:12},
-{name:"أوميجا 3",price:150,stock:8},
-{name:"حديد فيروجلوبين",price:85,stock:14},
-{name:"كالسيوم",price:70,stock:16},
-{name:"بانادول اكسترا",price:42,stock:20},
-{name:"ادول",price:28,stock:25},
-{name:"نوفالدول",price:30,stock:20},
-{name:"باراسيتامول",price:18,stock:40},
-{name:"ايبروفين",price:25,stock:30},
-{name:"ديكلوفين",price:35,stock:15},
-{name:"أموكسيل 500",price:55,stock:12},
-{name:"زيثروماكس",price:95,stock:8},
-{name:"سيبروفلوكساسين",price:70,stock:10},
-{name:"دوكسي",price:40,stock:15},
-{name:"سبترين",price:38,stock:18},
-{name:"فلاجيل شراب",price:32,stock:12},
-{name:"موتيليوم",price:48,stock:14},
-{name:"جافيسكون",price:65,stock:10},
-{name:"أوميز 20",price:58,stock:16},
-{name:"نيكسيوم 40",price:110,stock:8},
-{name:"كونترولوك",price:95,stock:9},
-{name:"دومبي",price:35,stock:15},
-{name:"سبازمومين",price:42,stock:12},
-{name:"بوسكوبان",price:38,stock:18},
-{name:"كولونا",price:52,stock:10},
-{name:"ليبراكس",price:45,stock:12},
-{name:"دايجستين",price:30,stock:20},
-{name:"سبازمو ديجستين",price:28,stock:22},
-{name:"فينادون",price:55,stock:10},
-{name:"أبيدون",price:48,stock:12},
-{name:"بريدسول",price:42,stock:14},
-{name:"سولوبريد 20",price:65,stock:8},
-{name:"ديكسا",price:28,stock:18},
-{name:"هستازين",price:22,stock:25},
-{name:"أناللرج",price:25,stock:20},
-{name:"أفيل",price:30,stock:15},
-{name:"تافيجيل",price:28,stock:18},
-{name:"سينلرج",price:35,stock:15},
-{name:"كومتركس",price:38,stock:12},
-{name:"وان تو ثري",price:32,stock:15},
-{name:"سي ريتارد",price:45,stock:18},
-{name:"فيتاسيد",price:38,stock:20},
-{name:"سي فيت",price:42,stock:15},
-{name:"زنك",price:50,stock:20},
-{name:"ماغنسيوم",price:75,stock:12},
-{name:"بي كومبلكس",price:40,stock:18},
-{name:"نيوروفيت",price:55,stock:15},
-{name:"نيوروتون",price:48,stock:12},
-{name:"ميلجا",price:65,stock:10},
-{name:"ديبوفيت",price:38,stock:15},
-{name:"بيتولفكس",price:45,stock:12},
-{name:"ثيوتاسيد",price:85,stock:8},
-{name:"كارنيتين",price:120,stock:6},
-{name:"رويال فيت جي",price:95,stock:10},
-{name:"سنتروم",price:180,stock:6},
-{name:"فيروترون",price:75,stock:12},
-{name:"فيرس",price:68,stock:10},
-{name:"هيموجيت",price:55,stock:14},
-{name:"ايبيلات",price:42,stock:15},
-{name:"كونكور 5",price:72,stock:12},
-{name:"كونكور 10",price:95,stock:10},
-{name:"نورفاسك 5",price:65,stock:12},
-{name:"كابوتن",price:38,stock:15},
-{name:"ايزابريل",price:45,stock:14},
-{name:"لاسكس",price:30,stock:18},
-{name:"أتور 10",price:85,stock:12},
-{name:"أتور 20",price:110,stock:10},
-{name:"كريستور 10",price:120,stock:8},
-{name:"ليبيتور",price:95,stock:10},
-{name:"جلوكوفاج 500",price:32,stock:20},
-{name:"جلوكوفاج 1000",price:45,stock:18},
-{name:"أماريل 2",price:55,stock:15},
-{name:"دياميكرون",price:65,stock:12},
-{name:"جانوميت",price:140,stock:8},
-{name:"ميتفورمين",price:28,stock:22},
-{name:"لانتوس",price:350,stock:5},
-{name:"نوفورابيد",price:280,stock:6},
-{name:"ميكستارد",price:220,stock:6},
-{name:"فنتولين بخاخ",price:75,stock:10},
-{name:"سيريتايد",price:250,stock:5},
-{name:"سيمبيكورت",price:280,stock:4},
-{name:"فوراديل",price:180,stock:6},
-{name:"زيلون",price:35,stock:18},
-{name:"أولفنت",price:42,stock:15},
-{name:"ميوكوسول",price:38,stock:16},
-{name:"توسكان",price:35,stock:18},
-{name:"برونشيكم",price:48,stock:12},
-{name:"جوافة شراب",price:32,stock:15},
-{name:"ايفيروسبان",price:65,stock:10},
-{name:"أوبلكس",price:40,stock:14},
-{name:"سيلجون",price:45,stock:12},
-{name:"نوتوسيل",price:38,stock:15},
-{name:"دايسينون",price:48,stock:12},
-{name:"كابرون",price:55,stock:10},
-{name:"دافلون 500",price:95,stock:10},
-{name:"ديوسمين",price:75,stock:12},
-{name:"هيموكلار",price:35,stock:18},
-{name:"ريباريل جل",price:58,stock:10},
-{name:"هيموكلار كريم",price:42,stock:12},
-{name:"فيوسيدين",price:48,stock:15},
-{name:"فيوسيكورت",price:65,stock:10},
-{name:"جاراميسين",price:38,stock:15},
-{name:"تيراميسين مرهم",price:32,stock:18},
-{name:"كيناكومب",price:45,stock:14},
-{name:"ديرماتين",price:35,stock:16},
-{name:"لاميزيل",price:75,stock:8},
-{name:"ديرموفيت",price:38,stock:15},
-{name:"اليكا",price:42,stock:12},
-{name:"اليكا ام",price:52,stock:10},
-{name:"بيتاديرم",price:30,stock:18},
-{name:"فيوسي",price:40,stock:15},
-{name:"تاروليمس",price:120,stock:6},
-{name:"بانثينول",price:35,stock:20},
-{name:"بيبانثين",price:75,stock:12},
-{name:"موندو",price:55,stock:14},
-{name:"كارباميد",price:28,stock:20},
-{name:"جليسوليد",price:45,stock:15},
-{name:"نيفيا سوفت",price:85,stock:10},
-{name:"سيتافيل",price:180,stock:6},
-{name:"بيوديرما",price:220,stock:5},
-{name:"لاروش",price:280,stock:4},
-{name:"افين",price:250,stock:5},
-{name:"يوسيرين",price:200,stock:6},
-{name:"دوف",price:65,stock:15},
-{name:"جونسون",price:55,stock:18},
-{name:"سانوسان",price:75,stock:12},
-{name:"سيباميد",price:95,stock:10},
-{name:"موستيلا",price:150,stock:8},
-{name:"بامبرز",price:180,stock:10},
-{name:"مولفيكس",price:160,stock:12},
-{name:"بيبي جوي",price:150,stock:10},
-{name:"سودو كريم",price:95,stock:12},
-{name:"زنك أوليف",price:45,stock:18},
-{name:"ديسيتين",price:65,stock:12},
-{name:"بيبي كريم",price:40,stock:15},
-{name:"كير باي كير",price:55,stock:12},
-{name:"سيتال شراب",price:28,stock:20},
-{name:"بروفين شراب",price:38,stock:15},
-{name:"ميجافين",price:42,stock:12},
-{name:"دولفين",price:45,stock:14},
-{name:"كتافلاي",price:40,stock:15},
-{name:"سيتال نقط",price:22,stock:20},
-{name:"فيدروب",price:35,stock:18},
-{name:"كالسي كال",price:48,stock:15},
-{name:"هاي كال",price:55,stock:12},
-{name:"اوستيوكير",price:85,stock:10},
-{name:"بدياشور",price:150,stock:8},
-{name:"سيريلاك",price:95,stock:12},
-{name:"نان 1",price:280,stock:6},
-{name:"بيبيلاك",price:250,stock:8},
-{name:"هيرو بيبي",price:220,stock:8},
-{name:"ابتاميل",price:290,stock:5},
-{name:"سيميلاك",price:270,stock:6},
-<!-- END PART 2 -->
-  {name:"بيدياميل",price:240,stock:6},
-{name:"نيدو",price:180,stock:8},
-{name:"لبن جهينة",price:35,stock:20},
-{name:"شامبو جونسون",price:75,stock:12},
-{name:"شامبو سانوسان",price:85,stock:10},
-{name:"زيت جونسون",price:65,stock:15},
-{name:"كريم جونسون",price:55,stock:14},
-{name:"وايبس",price:45,stock:20},
-{name:"قطن",price:25,stock:25},
-{name:"شاش",price:30,stock:20},
-{name:"بلاستر",price:18,stock:30},
-{name:"ترمومتر",price:65,stock:10},
-{name:"جهاز ضغط",price:450,stock:4},
-{name:"جهاز سكر",price:380,stock:5},
-{name:"شرايط سكر",price:150,stock:10},
-{name:"سرنجات",price:12,stock:40},
-{name:"كمامة",price:10,stock:50},
-{name:"جوانتي",price:35,stock:25},
-{name:"كحول",price:30,stock:30},
-{name:"بيتادين",price:42,stock:18},
-{name:"ماء أكسجين",price:22,stock:20},
-{name:"محلول ملح",price:28,stock:18},
-{name:"جلوكوز",price:32,stock:15},
-{name:"رينجر",price:35,stock:12},
-{name:"فياجرا",price:95,stock:8},
-{name:"سياليس",price:120,stock:6},
-{name:"فيتارم",price:85,stock:10}
+  {name:"بانادول",price:35,cost:28,stock:50,barcode:"1001"},
+{name:"كونجستال",price:28,cost:22,stock:40,barcode:"1002"},
+{name:"أوجمنتين 1جم",price:95,cost:78,stock:25,barcode:"1003"},
+{name:"أوجمنتين 625",price:75,cost:60,stock:30,barcode:"1004"},
+{name:"فلوموكس 500",price:45,cost:36,stock:35,barcode:"1005"},
+{name:"زيثروماكس",price:120,cost:95,stock:15,barcode:"1006"},
+{name:"بروفين 400",price:22,cost:17,stock:60,barcode:"1007"},
+{name:"كتافلام 50",price:32,cost:25,stock:45,barcode:"1008"},
+{name:"فولتارين جل",price:55,cost:42,stock:20,barcode:"1009"},
+{name:"أنتينال",price:18,cost:13,stock:55,barcode:"1010"},
+{name:"فلاجيل 500",price:25,cost:19,stock:48,barcode:"1011"},
+{name:"أوميبرازول",price:40,cost:31,stock:38,barcode:"1012"},
+{name:"جليكوفاج",price:30,cost:23,stock:42,barcode:"1013"},
+{name:"كونكور 5",price:65,cost:52,stock:22,barcode:"1014"},
+{name:"كابوتن",price:38,cost:30,stock:28,barcode:"1015"},
+{name:"أدوية الحساسية - زيرتك",price:45,cost:35,stock:33,barcode:"1016"},
+{name:"كلاريتين",price:52,cost:41,stock:26,barcode:"1017"},
+{name:"فيتامين سي",price:30,cost:22,stock:70,barcode:"1018"},
+{name:"فيتامين د",price:85,cost:68,stock:18,barcode:"1019"},
+{name:"حديد - فيروجلوبين",price:95,cost:75,stock:16,barcode:"1020"},
+{name:"كالسيوم",price:70,cost:55,stock:24,barcode:"1021"},
+{name:"بيدياميل",price:240,cost:210,stock:6,barcode:"1022"},
+{name:"نيدو",price:180,cost:150,stock:8,barcode:"1023"},
+{name:"لبن جهينة",price:35,cost:28,stock:20,barcode:"1024"},
+{name:"شامبو جونسون",price:75,cost:60,stock:12,barcode:"1025"},
+{name:"شامبو سانوسان",price:85,cost:68,stock:10,barcode:"1026"},
+{name:"زيت جونسون",price:65,cost:50,stock:15,barcode:"1027"},
+{name:"كريم جونسون",price:55,cost:42,stock:14,barcode:"1028"},
+{name:"وايبس",price:45,cost:34,stock:20,barcode:"1029"},
+{name:"قطن",price:25,cost:18,stock:25,barcode:"1030"},
+{name:"شاش",price:30,cost:22,stock:20,barcode:"1031"},
+{name:"بلاستر",price:18,cost:12,stock:30,barcode:"1032"},
+{name:"ترمومتر",price:65,cost:48,stock:10,barcode:"1033"},
+{name:"جهاز ضغط",price:450,cost:360,stock:4,barcode:"1034"},
+{name:"جهاز سكر",price:380,cost:300,stock:5,barcode:"1035"},
+{name:"شرايط سكر",price:150,cost:120,stock:10,barcode:"1036"},
+{name:"سرنجات",price:12,cost:8,stock:40,barcode:"1037"},
+{name:"كمامة",price:10,cost:6,stock:50,barcode:"1038"},
+{name:"جوانتي",price:35,cost:25,stock:25,barcode:"1039"},
+{name:"كحول",price:30,cost:21,stock:30,barcode:"1040"}
 ];
-function show(){
-let q=document.getElementById("search").value||"";
-let list=document.getElementById("list");
-list.innerHTML="";
-meds.filter(m=>m.name.includes(q)).forEach(m=>{
-list.innerHTML+=`<div class="card"><b>${m.name}</b><br>السعر: ${m.price} جنيه - المخزون: ${m.stock}<br>${role==="manager"?`<button onclick="alert('تم البيع')">بيع</button> <button onclick="alert('تم التعديل')">تعديل</button>`:`<button onclick="alert('تم البيع')">بيع</button>`}</div>`;
-});
-}
+<!-- END PART 2 -->
+  let cart=[];let sales=JSON.parse(localStorage.getItem("afiya_sales")||"[]");
+function save(){localStorage.setItem("afiya_meds",JSON.stringify(meds));localStorage.setItem("afiya_sales",JSON.stringify(sales));}
+function doLogin(){let p=document.getElementById("pass").value;if(p==="1234"){role="manager";}else if(p==="1111"){role="cashier";}else{document.getElementById("loginError").style.display="block";return;}document.getElementById("loginPage").classList.add("hidden");document.getElementById("app").classList.remove("hidden");document.getElementById("roleLabel").textContent=role==="manager"?"مدير":"كاشير";if(role==="cashier"){document.getElementById("page-add").innerHTML="";}updateStats();renderSale();renderStock();renderReport();}
+function logout(){location.reload();}
+function showTab(t){["sale","stock","add","report"].forEach(x=>{document.getElementById("page-"+x).classList.add("hidden");document.getElementById("tab-btn-"+x).classList.remove("active");});document.getElementById("page-"+t).classList.remove("hidden");document.getElementById("tab-btn-"+t).classList.add("active");if(t==="stock")renderStock();if(t==="report")renderReport();}
+function updateStats(){document.getElementById("totalMeds").textContent=meds.length;let today=new Date().toDateString();let tot=sales.filter(s=>new Date(s.time).toDateString()===today).reduce((a,s)=>a+s.total,0);document.getElementById("todaySales").textContent=tot+" ج";document.getElementById("lowCount").textContent=meds.filter(m=>m.stock<=5).length;}
+function renderSale(){let q=(document.getElementById("search").value||"").trim();let list=document.getElementById("saleList");list.innerHTML="";meds.filter(m=>m.name.includes(q)||(m.barcode||"").includes(q)).forEach((m,i)=>{let idx=meds.indexOf(m);list.innerHTML+=`<div class="card ${m.stock<=5?"low":""}"><div style="display:flex;justify-content:space-between"><b>${m.name}</b><b style="color:#0a6b3c">${m.price} ج</b></div><div style="color:#666;font-size:13px">الباركود: ${m.barcode} | المخزون: ${m.stock} ${m.stock<=5?'<span class="badge">⚠️ ناقص</span>':''}</div><div class="row" style="margin-top:10px"><button class="small green" style="flex:1" onclick="addToCart(${idx})">+ إضافة للفاتورة</button><button class="small orange" onclick="quickSell(${idx})">بيع سريع</button></div></div>`;});renderCart();}
+function renderStock(){let q=(document.getElementById("searchStock").value||"").trim();let list=document.getElementById("stockList");list.innerHTML="";meds.filter(m=>m.name.includes(q)).forEach((m)=>{let idx=meds.indexOf(m);list.innerHTML+=`<div class="card ${m.stock<=5?"low":""}"><div style="display:flex;justify-content:space-between"><b>${m.name}</b><span>${m.price} ج</span></div><div style="color:#666;font-size:13px">المخزون: ${m.stock} | الشراء: ${m.cost||0} ج</div><div class="row" style="margin-top:10px"><button class="small green" onclick="changeStock(${idx},1)">+1</button><button class="small gray" onclick="changeStock(${idx},-1)">-1</button><button class="small orange" onclick="editPrice(${idx})">تعديل سعر</button><button class="small red" onclick="deleteMed(${idx})">حذف</button></div></div>`;});}
+function addToCart(idx){let f=cart.find(c=>c.idx===idx);if(f){f.qty++;}else{cart.push({idx,qty:1});}renderCart();}
+function renderCart(){let el=document.getElementById("cart");let total=0;if(cart.length===0){el.innerHTML="<p style='color:#888'>لا توجد أصناف في الفاتورة</p>";}else{el.innerHTML=cart.map((c,i)=>{let m=meds[c.idx];let s=m.price*c.qty;total+=s;return `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee"><span>${m.name} × ${c.qty}</span><span>${s} ج <button onclick="removeFromCart(${i})" style="border:0;background:none;color:red">✕</button></span></div>`;}).join("");}document.getElementById("cartTotal").textContent=total+" ج";}
+function removeFromCart(i){cart.splice(i,1);renderCart();}
+function clearCart(){cart=[];renderCart();}
+function quickSell(idx){let m=meds[idx];if(m.stock<=0){alert("المخزون خلص!");return;}m.stock--;sales.push({items:[{name:m.name,qty:1,price:m.price}],total:m.price,profit:(m.price-(m.cost||0)),time:new Date().toISOString()});save();updateStats();renderSale();renderStock();alert("تم بيع "+m.name+" بنجاح ✅");}
+function checkout(){if(cart.length===0){alert("الفاتورة فاضية!");return;}let total=0;let profit=0;let items=cart.map(c=>{let m=meds[c.idx];total+=m.price*c.qty;profit+=(m.price-(m.cost||0))*c.qty;m.stock-=c.qty;return{name:m.name,qty:c.qty,price:m.price};});sales.push({items,total,profit,time:new Date().toISOString()});save();updateStats();renderSale();renderStock();cart=[];renderCart();alert("تم البيع بنجاح ✅\nالإجمالي: "+total+" ج");window.print();}
+function addMed(){let n=document.getElementById("newName").value.trim();let p=Number(document.getElementById("newPrice").value);let c=Number(document.getElementById("newCost").value||0);let s=Number(document.getElementById("newStock").value);let b=document.getElementById("newBarcode").value.trim();if(!n||!p||isNaN(s)){alert("اكتب الاسم والسعر والكمية");return;}meds.push({name:n,price:p,cost:c,stock:s,barcode:b||String(Date.now()).slice(-4)});save();updateStats();renderSale();renderStock();document.getElementById("addMsg").textContent="تمت الإضافة بنجاح ✅ "+n;["newName","newPrice","newCost","newStock","newBarcode"].forEach(id=>document.getElementById(id).value="");}
+function changeStock(idx,d){meds[idx].stock=Math.max(0,meds[idx].stock+d);save();updateStats();renderStock();renderSale();}
+function editPrice(idx){let v=prompt("السعر الجديد لـ "+meds[idx].name,meds[idx].price);if(v!==null&&!isNaN(Number(v))){meds[idx].price=Number(v);save();renderStock();renderSale();}}
+function deleteMed(idx){if(confirm("متأكدة تحذفي "+meds[idx].name+" ؟")){meds.splice(idx,1);save();updateStats();renderStock();renderSale();}}
+function renderReport(){let today=new Date().toDateString();let todays=sales.filter(s=>new Date(s.time).toDateString()===today);document.getElementById("invCount").textContent=todays.length;document.getElementById("repTotal").textContent=todays.reduce((a,s)=>a+s.total,0)+" ج";document.getElementById("repProfit").textContent=todays.reduce((a,s)=>a+(s.profit||0),0)+" ج";document.getElementById("reportList").innerHTML=todays.slice().reverse().map(s=>`<div class="card"><b>${new Date(s.time).toLocaleTimeString("ar-EG")}</b> - ${s.total} ج<div style="color:#666;font-size:13px">${s.items.map(i=>i.name+" × "+i.qty).join(" ، ")}</div></div>`).join("")||"<p style='color:#888'>لا توجد مبيعات اليوم</p>";}
+function exportReport(){let txt="تقرير صيدلية العافية - "+new Date().toLocaleDateString("ar-EG")+"\n"+sales.map(s=>s.items.map(i=>i.name+" × "+i.qty).join(", ")+" = "+s.total+" ج").join("\n");navigator.clipboard.writeText(txt).then(()=>alert("تم نسخ التقرير ✅"));}
 </script>
 </body>
 </html>
+  
